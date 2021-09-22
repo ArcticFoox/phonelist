@@ -13,6 +13,26 @@ struct Node{
 
 Node tree[10000];
 
+void right_rotation(Node* &x){
+    Node* y = x->left;
+    Node* g = y->right;
+
+    x->left = g;
+    y->right = x;
+
+    x = y;
+}
+
+void left_rotation(Node* &y) {
+    Node *x = y->right;
+    Node *g = x->left;
+
+    x->left = y;
+    y->right = g;
+
+    y = x;
+}
+
 Node* insertion(Node* node, string name, long phonenum){
     if(node == NULL){
         node = new Node();
@@ -29,73 +49,56 @@ Node* insertion(Node* node, string name, long phonenum){
     }
     return node;
 }
+// delete node
+bool deleteNode(Node* &root, string name){
+    if(root == NULL) return false;
 
-Node* FindMax(Node* root){
-    if(root == NULL) return NULL;
+    if(name < root->name)
+        return deleteNode(root->left, name);
+    if(name > root->name)
+        return deleteNode(root->right, name);
 
-    while(root->right != NULL){
-        root = root->right;
+    
+    //no child
+    if(root->left == NULL && root->right == NULL){
+        delete root;
+        root = NULL;
+        cout << "Deleted\n";
     }
-    return root;
-}
-
-Node* deleteNode(Node* root, string name){
-    if(root == NULL) return root;
-    else if(name < root->name)
-        root->left = deleteNode(root->left, name);
-    else if(name > root->name)
-        root->right = deleteNode(root->right, name);
+    //one child
+    else if(!root->right || !root->left){
+        Node* child = (root->left) ? root->left : root->right;
+        Node* old_root = root;
+        root = child;
+        delete old_root;
+        cout << "Deleted\n";
+    }
+    //two child
     else{
-        //no child
-        if(root->left == NULL && root->right == NULL){
-            delete root;
-            root = NULL;
-            cout << "Deleted\n";
+        if(root->left->name < root->right->name){
+            left_rotation(root);
+            deleteNode(root->left, name);
         }
-        //one child
-        else if(root->right == NULL){
-            Node* temp = root;
-            root = root->left;
-            delete temp;
-            cout << "Deleted\n";
-        }
-        else if(root->left == NULL){
-            Node* temp = root;
-            root = root->right;
-            delete temp;
-            cout << "Deleted\n";
-        }
-        //two child
         else{
-            Node* temp = FindMax(root->left);
-            root->name = temp->name;
-            root->left = deleteNode(root->left, temp->name);
+            right_rotation(root);
+            deleteNode(root->right, name);
         }
     }
-    return root;
+    
+    return true;
 }
-
-
-void preorder(Node* node){
-    cout << node->name << "  " << node-> phonenum << "\n";
-
-    if(node->left != NULL)
-        preorder(node->left);
-    if(node->right != NULL)
-        preorder(node->right);
-}
-
+//inorder tree traversal
 void inorder(Node* node){
-    if(node->left != NULL)
-        inorder(node->left);
+    if(node == NULL){ 
+        return;
+    }
+    inorder(node->left);
     cout << node->name << "  " << node-> phonenum << "\n";
-    if(node->right != NULL)
-        inorder(node->right);
+    inorder(node->right);
 }
 
-void search(Node* node, string name){
+void search(Node* &node, string name){
     if(node == NULL){
-        cout << "This is empty\n";
         return;
     }
 

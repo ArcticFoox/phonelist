@@ -6,9 +6,18 @@ using namespace std;
 
 struct Node{
     string name;
-    long phonenum;
+    string phonenum;
     Node* left;
     Node* right;
+
+    Node() {}
+
+    Node(string name, string phonenum){
+        this->name = name;
+        this->phonenum = phonenum;
+        this->left = NULL;
+        this->right = NULL;
+    }
 };
 
 Node tree[10000];
@@ -33,21 +42,16 @@ void left_rotation(Node* &y) {
     y = x;
 }
 
-Node* insertion(Node* node, string name, long phonenum){
-    if(node == NULL){
-        node = new Node();
-        node->name = name;
-        node->phonenum = phonenum;
-        node->left = node->right = NULL;
-    }
+void insertion(Node* &root, string name, string phonenum){
+    if(root == NULL) return void(root = new Node(name, phonenum));
 
-    else if(name <= node->name){
-        node->left = insertion(node->left, name, phonenum);
-    }
-    else {
-        node->right = insertion(node->right, name, phonenum);
-    }
-    return node;
+    insertion(name <= root->name ? root->left : root->right, name, phonenum);
+
+    if (root->left && root->left->name > root->name)
+        right_rotation(root);
+
+    if (root->right && root->right->name > root->name)
+        left_rotation(root);
 }
 // delete node
 bool deleteNode(Node* &root, string name){
@@ -122,7 +126,7 @@ void search(Node* &node, string name){
 int main() {
     Node* root = NULL;
     string name;
-    long phonenum;
+    string phonenum;
     bool b = true;
     while(b){
         int button;
@@ -131,7 +135,7 @@ int main() {
         switch(button){
             case 1:
                 cin >> name >> phonenum;
-                root = insertion(root, name, phonenum);
+                insertion(root, name, phonenum);
                 break;
             case 2:
                 cin >> name;

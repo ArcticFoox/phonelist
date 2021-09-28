@@ -1,6 +1,8 @@
-#include <iostream>
-#include <string>
-#include <algorithm>
+#include<iostream>
+#include<string>
+#include<sstream>
+#include<algorithm>
+#include<fstream>
 
 using namespace std;
 
@@ -21,6 +23,8 @@ struct Node{
 };
 
 Node tree[10000];
+ifstream readfromFile;
+ofstream writeFile;
 
 void right_rotation(Node* &x){
     Node* y = x->left;
@@ -92,21 +96,21 @@ bool deleteNode(Node* &root, string name){
     return true;
 }
 //inorder tree traversal
-void inorder(Node* node){
-    if(node == NULL){ 
+void inorder(Node* root){
+    if(root == NULL){ 
         return;
     }
-    inorder(node->left);
-    cout << node->name << "  " << node-> phonenum << "\n";
-    inorder(node->right);
+    inorder(root->left);
+    cout << root->name << "  " << root-> phonenum << "\n";
+    inorder(root->right);
 }
 
-void search(Node* &node, string name){
-    if(node == NULL){
+void search(Node* &root, string name){
+    if(root == NULL){
         return;
     }
 
-    Node* current = node;
+    Node* current = root;
 
     while(current){
         if(current->name == name){
@@ -123,11 +127,53 @@ void search(Node* &node, string name){
     return;
 }
 
+void save(Node* root){
+    writeFile.open("phonelist.txt");
+    writeFile.clear();
+
+    if(root == NULL){ 
+        return;
+    }
+
+    save(root->left);
+    writeFile.write(root->name.c_str(), root->name.size());
+    writeFile.write(" ", 1);
+    writeFile.write(root->phonenum.c_str(), root->phonenum.size());
+    writeFile.write("\n", 1);
+    save(root->right);
+}
+
+void load(Node* &root){
+    readfromFile.open("phonelist.txt");
+
+    if(readfromFile.is_open()){
+        while(!readfromFile.eof()){
+            string str1, str2;
+            bool judge = true;
+
+            if(judge){
+                readfromFile >> str1;
+                judge = false;
+            }
+
+            if(!judge){
+                readfromFile >> str2;
+                judge = true;
+            }
+
+            insertion(root, str1, str2);
+        }
+        readfromFile.close();
+    }
+    return;
+}
+
 int main() {
     Node* root = NULL;
     string name;
     string phonenum;
     bool b = true;
+    load(root);
     while(b){
         int button;
         cout << "insertion 1, remove 2, arrange 3, save 4, search 5, escape 6" << "\n";
@@ -145,6 +191,9 @@ int main() {
                 inorder(root);
                 break;
             case 4:
+                save(root);
+                writeFile.close();
+                cout << "List is saved"<< "\n";
                 break;
             case 5:
                 cin >> name;

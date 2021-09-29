@@ -25,6 +25,7 @@ struct Node{
 Node tree[10000];
 ifstream readfromFile;
 ofstream writeFile;
+bool savepoint = false;
 
 void right_rotation(Node* &x){
     Node* y = x->left;
@@ -129,8 +130,11 @@ void search(Node* &root, string name){
 
 void save(Node* root){
     writeFile.open("phonelist.txt");
-    writeFile.clear();
 
+    if(savepoint){
+        writeFile.clear();
+    }
+    
     if(root == NULL){ 
         return;
     }
@@ -191,6 +195,7 @@ int main() {
                 inorder(root);
                 break;
             case 4:
+                savepoint = true;
                 save(root);
                 writeFile.close();
                 cout << "List is saved"<< "\n";

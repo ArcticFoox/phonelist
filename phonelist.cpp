@@ -1,6 +1,5 @@
 #include<iostream>
 #include<string>
-#include<sstream>
 #include<algorithm>
 #include<fstream>
 
@@ -22,11 +21,11 @@ struct Node{
     }
 };
 
-Node tree[10000];
 ifstream readfromFile;
 ofstream writeFile;
 bool savepoint = false;
 
+//rotation process 를 하기 위한 함수
 void right_rotation(Node* &x){
     Node* y = x->left;
     Node* g = y->right;
@@ -36,7 +35,7 @@ void right_rotation(Node* &x){
 
     x = y;
 }
-
+//rotation process 를 하기 위한 함수
 void left_rotation(Node* &y) {
     Node *x = y->right;
     Node *g = x->left;
@@ -46,7 +45,7 @@ void left_rotation(Node* &y) {
 
     y = x;
 }
-
+//add를 하기 위한 함수
 void insertion(Node* &root, string name, string phonenum){
     if(root == NULL) return void(root = new Node(name, phonenum));
 
@@ -58,7 +57,7 @@ void insertion(Node* &root, string name, string phonenum){
     if (root->right && root->right->name > root->name)
         left_rotation(root);
 }
-// delete node
+// delete node를 하기 위한 함수
 bool deleteNode(Node* &root, string name){
     if(root == NULL) return false;
 
@@ -66,15 +65,14 @@ bool deleteNode(Node* &root, string name){
         return deleteNode(root->left, name);
     if(name > root->name)
         return deleteNode(root->right, name);
-
     
-    //no child
+    //no child 일 경우
     if(root->left == NULL && root->right == NULL){
         delete root;
         root = NULL;
         cout << "Deleted\n";
     }
-    //one child
+    //one child 일 경우
     else if(!root->right || !root->left){
         Node* child = (root->left) ? root->left : root->right;
         Node* old_root = root;
@@ -82,7 +80,7 @@ bool deleteNode(Node* &root, string name){
         delete old_root;
         cout << "Deleted\n";
     }
-    //two child
+    //two child 일 경우
     else{
         if(root->left->name < root->right->name){
             left_rotation(root);
@@ -96,8 +94,8 @@ bool deleteNode(Node* &root, string name){
     
     return true;
 }
-//inorder tree traversal
-void inorder(Node* root){
+//inorder tree traversal(arrange)를 하기 위한 함수
+void inorder(Node* &root){
     if(root == NULL){ 
         return;
     }
@@ -105,7 +103,7 @@ void inorder(Node* root){
     cout << root->name << "  " << root-> phonenum << "\n";
     inorder(root->right);
 }
-
+//search를 하기 위한 함수
 void search(Node* &root, string name){
     if(root == NULL){
         return;
@@ -116,6 +114,10 @@ void search(Node* &root, string name){
     while(current){
         if(current->name == name){
             cout << current->name << " " << current->phonenum << "\n";
+            if(current->left->name == name){
+                current = current->left;
+                continue;
+            }
             return;
         }
         else if(current->name > name)
@@ -127,8 +129,8 @@ void search(Node* &root, string name){
     cout << name << " does not exist" <<"\n";
     return;
 }
-
-void save(Node* root){
+//save를 하기 위한 함수
+void save(Node* &root){
     writeFile.open("phonelist.txt");
 
     if(savepoint){
@@ -146,7 +148,7 @@ void save(Node* root){
     writeFile.write("\n", 1);
     save(root->right);
 }
-
+// load를 하기 위한 함수
 void load(Node* &root){
     readfromFile.open("phonelist.txt");
 
@@ -176,20 +178,25 @@ int main() {
     Node* root = NULL;
     string name;
     string phonenum;
-    bool b = true;
+    bool it = true;
     load(root);
-    while(b){
+    while(it){
         int button;
         cout << "insertion 1, remove 2, arrange 3, save 4, search 5, escape 6" << "\n";
         cin >> button;
         switch(button){
             case 1:
+                cout << "Enter name and phonenumber\n";
                 cin >> name >> phonenum;
                 insertion(root, name, phonenum);
                 break;
             case 2:
+                cout << "Enter the name\n";
                 cin >> name;
-                deleteNode(root, name);
+                if(deleteNode(root, name))
+                    cout << name << " is removed\n";
+                else
+                    cout << name << " is not found\n";
                 break;
             case 3:
                 inorder(root);
@@ -201,11 +208,12 @@ int main() {
                 cout << "List is saved"<< "\n";
                 break;
             case 5:
+                cout << "Enter the name\n";
                 cin >> name;
                 search(root, name);
                 break;
             case 6:
-                b = false;
+                it = false;
                 break;
             default:
                 cout << "wrong button try again" << "\n";
